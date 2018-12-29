@@ -197,13 +197,7 @@ module.exports = function (br, emit) {
     (req, res) => {
       let start = 0
       let end = parseInt(req.params[ 1 ])
-      /*
-       if (req.headers.range) {
-       let range = req.headers.range
-       let positions = range.replace(/bytes=/, "").split("-")
-       start = positions[ 0 ] ? parseInt(positions[ 0 ]) : null
-       end = positions[ 1 ] ? parseInt(positions[ 1 ]) : req.params[ 1 ]
-       }*/
+
       let url = new OffUrl()
       url.contentType = req.params[ 0 ]
       url.streamOffset = start
@@ -218,33 +212,6 @@ module.exports = function (br, emit) {
           return res.status(500).send()
         }
       })
-    })
-  off.post(/\/offsystem\/v3\/([-+.\w]+\/[-+.\w]+)\/(\d+)\/([123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+)\/([123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+)\/([^ !$`&*()+]*|\\[ !$`&*()+]*)+/,
-    (req, res) => {
-      let start = 0
-      let end = parseInt(req.params[ 1 ])
-      /*
-       if (req.headers.range) {
-       let range = req.headers.range
-       let positions = range.replace(/bytes=/, "").split("-")
-       start = positions[ 0 ] ? parseInt(positions[ 0 ]) : null
-       end = positions[ 1 ] ? parseInt(positions[ 1 ]) : req.params[ 1 ]
-       }*/
-      let url = new OffUrl()
-      url.contentType = req.params[ 0 ]
-      url.streamOffset = start
-      url.streamLength = parseInt(req.params[ 1 ])
-      url.streamOffsetLength = parseInt(end)
-      url.fileHash = req.params[ 2 ]
-      url.descriptorHash = req.params[ 3 ]
-      url.fileName = req.params[ 4 ]
-      try {
-        br.removeTemporaries(url)
-        return res.end('Success')
-      } catch (ex) {
-        emit('error', ex)
-        return res.status(500).send()
-      }
     })
   //off.use(express.static(pth.join(__dirname, 'static')))
   return off

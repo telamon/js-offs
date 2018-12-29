@@ -43,7 +43,7 @@ module.exports = class Scheduler extends EventEmitter {
         //4. If not possible to reach 50% redistribute blocks that are less then 30% redundant and then delete
         //5. If not possible to redistribute sleep until more connections obtained
         isCleaning = true
-        let pingBlock = (key, cb)=> {
+        let pingBlock = (key, cb) => {
           let redundancy = Math.floor(bucket.count * config.redundancy)
           redundancy = (redundancy < 1 && bucket.count > 0) ? 1 : redundancy
           let count = 0
