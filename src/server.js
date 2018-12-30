@@ -157,10 +157,15 @@ module.exports = function (br, emit) {
 
   off.put('/offsystem/', (req, res)=> {
     let url = new OffUrl()
-    url.serverAddress = req.get('server-address') || url.serverAddress
-    url.contentType = req.get('type')
-    url.fileName = req.get('file-name')
-    url.streamLength = parseInt(req.get('stream-length'))
+    try {
+      url.serverAddress = req.get('server-address') || url.serverAddress
+      url.contentType = req.get('type')
+      url.fileName = req.get('file-name')
+      url.streamLength = parseInt(req.get('stream-length'))
+    } catch (err) {
+      emit(err)
+      res.status(500).send('Invalid URL Headers')
+    }
     let recycle = req.get('recycler')
     let temporary = req.get('temporary')
     if (!url.streamLength) {
@@ -192,12 +197,11 @@ module.exports = function (br, emit) {
       res.status(500).send()
     }
   })
-
+  // Delete Temporary Block
   off.delete(/\/offsystem\/v3\/([-+.\w]+\/[-+.\w]+)\/(\d+)\/([123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+)\/([123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+)\/([^ !$`&*()+]*|\\[ !$`&*()+]*)+/,
     (req, res) => {
       let start = 0
       let end = parseInt(req.params[ 1 ])
-
       let url = new OffUrl()
       url.contentType = req.params[ 0 ]
       url.streamOffset = start
@@ -212,6 +216,27 @@ module.exports = function (br, emit) {
           return res.status(500).send()
         }
       })
+    })
+  // Release Temporary Status
+  off.post(/\/offsystem\/v3\/([-+.\w]+\/[-+.\w]+)\/(\d+)\/([123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+)\/([123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz]+)\/([^ !$`&*()+]*|\\[ !$`&*()+]*)+/,
+    (req, res) => {
+      let start = 0
+      let end = parseInt(req.params[ 1 ])
+      let url = new OffUrl()
+      url.contentType = req.params[ 0 ]
+      url.streamOffset = start
+      url.streamLength = parseInt(req.params[ 1 ])
+      url.streamOffsetLength = parseInt(end)
+      url.fileHash = req.params[ 2 ]
+      url.descriptorHash = req.params[ 3 ]
+      url.fileName = req.params[ 4 ]
+      try {
+        br.releaseTemporaries(url)
+        return res.end('Success')
+      } catch (ex) {
+        emit('error', ex)
+        return res.status(500).send()
+      }
     })
   //off.use(express.static(pth.join(__dirname, 'static')))
   return off
