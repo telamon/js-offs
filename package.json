@@ -45,8 +45,9 @@
       ]
     },
     "mac": {
+      "target": "dmg",
       "icon": "src/electron/images/off-logo.icns",
-      "artifactName": "OFF_System_${version}_mac_${arch}.zip"
+      "artifactName": "OFF_System_${version}_mac_${arch}.dmg"
     },
     "win": {
       "target": "nsis",
